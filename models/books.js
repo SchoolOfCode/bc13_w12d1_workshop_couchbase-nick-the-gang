@@ -1,4 +1,4 @@
-const { query } = require("../db/index.js");
+const couchbaseConnect = require("../db/index")
 
 async function getBooks() {
   // Query the database and return all books
@@ -17,7 +17,16 @@ async function searchBooksByAuthor(searchTerm) {
 
 async function getBookById(id) {
   // Query the database and return the book with a matching id
-  return {};
+  try {
+    const cluster = await couchbaseConnect();
+    const bucket = cluster.bucket("Library");
+    const scope = bucket.defaultScope();
+    const collection = scope.collection("book");
+    const result = await collection.get(id);
+    return result.content;
+ } catch (error) {
+   console.log(error);
+ }
 }
 
 async function createBook(book) {
